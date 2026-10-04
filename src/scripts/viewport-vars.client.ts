@@ -23,9 +23,29 @@ function updateHeroMediaVars(vw: number, mediaHeight: number) {
   frame?.setAttribute('data-fit', useCover ? 'cover' : 'contain');
 }
 
+/** Стабильные размеры без скачков от горизонтального скроллбара во время анимаций. */
+function readViewportSize() {
+  const vw = document.documentElement.clientWidth;
+  const vh = Math.round(
+    window.visualViewport?.height ?? document.documentElement.clientHeight,
+  );
+
+  return { vw, vh };
+}
+
+let lastVw = 0;
+let lastVh = 0;
+
 function setViewportVars() {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+  const { vw, vh } = readViewportSize();
+
+  if (Math.abs(vw - lastVw) < 1 && Math.abs(vh - lastVh) < 1) {
+    return;
+  }
+
+  lastVw = vw;
+  lastVh = vh;
+
   const headerHeight = measureHeaderHeight();
   const mediaHeight = Math.max(0, vh - headerHeight);
 
@@ -37,12 +57,19 @@ function setViewportVars() {
   updateHeroMediaVars(vw, mediaHeight);
 }
 
+let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+
+function scheduleViewportVars() {
+  window.clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(setViewportVars, 80);
+}
+
 function init() {
   setViewportVars();
 
-  window.addEventListener('resize', setViewportVars, { passive: true });
+  window.addEventListener('resize', scheduleViewportVars, { passive: true });
   window.addEventListener('orientationchange', setViewportVars);
-  window.visualViewport?.addEventListener('resize', setViewportVars);
+  window.visualViewport?.addEventListener('resize', scheduleViewportVars);
 
   const video = document.querySelector<HTMLVideoElement>('[data-hero-video]');
   if (video) {

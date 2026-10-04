@@ -1,7 +1,7 @@
 ---
-import { gallery } from '../../data/gallery';
 import Container from '../ui/Container/Container.astro';
 import Typography from '../ui/Typography/Typography.astro';
+import GalleryCarousel from './react/GalleryCarousel';
 import styles from './Gallery.module.scss';
 
 interface Props {
@@ -9,7 +9,6 @@ interface Props {
 }
 
 const { embedded = false } = Astro.props;
-const loopSlides = [...gallery, ...gallery];
 const Tag = embedded ? 'div' : 'section';
 ---
 
@@ -28,27 +27,6 @@ const Tag = embedded ? 'div' : 'section';
   </Container>
 
   <div class={`reveal ${styles.carouselOuter}`}>
-    <div class={styles.viewport} data-gallery-carousel>
-      <ul class={styles.track} aria-label="Галерея кадров">
-        {
-          loopSlides.map((item, index) => (
-            <li
-              class={styles.item}
-              aria-hidden={index >= gallery.length ? 'true' : undefined}
-            >
-              <img
-                class={styles.image}
-                src={item.src}
-                alt={index >= gallery.length ? '' : item.alt}
-                loading="lazy"
-                decoding="async"
-                width="800"
-                height="1000"
-              />
-            </li>
-          ))
-        }
-      </ul>
-    </div>
+    <GalleryCarousel client:visible />
   </div>
 </Tag>

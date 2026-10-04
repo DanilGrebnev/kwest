@@ -2,6 +2,7 @@
 
 .root {
   padding-block-end: var(--section-padding-y);
+  overflow-x: clip;
 }
 
 .header {
@@ -31,6 +32,9 @@
 
 .trap {
   width: 100%;
+  max-width: 100%;
   margin-bottom: var(--space-2);
   padding-block: var(--space-2);
+  overflow-x: clip;
+  contain: paint;
 }

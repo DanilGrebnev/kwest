@@ -1,0 +1,60 @@
+@use '../../../styles/mixins' as *;
+
+.viewport {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 5%,
+    #000 95%,
+    transparent 100%
+  );
+}
+
+.track {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding-block: var(--space-1);
+  touch-action: pan-y pinch-zoom;
+}
+
+.slide {
+  position: relative;
+  flex: 0 0 min(52vw, 13rem);
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-surface-border);
+  background: var(--color-surface);
+  aspect-ratio: 3 / 4;
+
+  @include respond(md) {
+    flex-basis: min(24vw, 15rem);
+  }
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+.staticGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding-block: var(--space-1);
+  list-style: none;
+  width: 100%;
+
+  .slide {
+    flex-basis: min(72vw, 14rem);
+  }
+}
