@@ -20,8 +20,6 @@ function updateHeroMediaVars(vw: number, mediaHeight: number) {
   const useCover = naturalWidth > vw;
 
   root.style.setProperty('--hero-media-width', `${width}px`);
-  root.style.setProperty('--hero-media-fit', useCover ? 'cover' : 'contain');
-
   frame?.setAttribute('data-fit', useCover ? 'cover' : 'contain');
 }
 

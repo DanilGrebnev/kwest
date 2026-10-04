@@ -18,14 +18,13 @@ import styles from './Booking.module.scss';
         Готовы погасить свет?
       </Typography>
       <Typography as="p" size="lg" class={styles.lead}>
-        Выберите дату, соберите команду и зайдите в дом, где отражения живут
-        своей жизнью. Мест немного — темнота не любит толпу.
+        Откройте расписание, выберите свободный слот и оставьте контакты —
+        запись займёт пару минут.
       </Typography>
 
       <div class={styles.actions}>
-        {/* href comes from site.booking — replace with external URL later */}
         <Button href={booking.href} variant="primary">
-          {booking.finalLabel}
+          {booking.chooseTimeLabel}
         </Button>
         <Button href={contacts.emailHref} variant="ghost">
           Написать нам

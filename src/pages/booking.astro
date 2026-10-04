@@ -1,0 +1,21 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header/Header.astro';
+import Footer from '../components/Footer/Footer.astro';
+import BookingRoot from '../components/booking/react/BookingRoot';
+import { site } from '../data/site';
+
+const title = `Бронирование — ${site.name}`;
+const description =
+  'Выберите дату и время для хоррор-квеста «И гаснет свет». Онлайн-запись на игру.';
+---
+
+<Layout title={title} description={description}>
+  <div id="top">
+    <Header />
+    <main id="main">
+      <BookingRoot client:load />
+    </main>
+    <Footer />
+  </div>
+</Layout>

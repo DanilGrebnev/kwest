@@ -9,12 +9,12 @@ export const site = {
   year: new Date().getFullYear(),
 };
 
-/** Replace href later with external booking URL, tel:, or messenger link. */
 export const booking = {
-  href: '#booking',
+  href: '/booking',
   label: 'Забронировать игру',
   secondaryLabel: 'Узнать свободные даты',
   finalLabel: 'Войти в темноту',
+  chooseTimeLabel: 'Выбрать время',
 };
 
 export const contacts = {

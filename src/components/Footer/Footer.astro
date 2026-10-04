@@ -1,8 +1,10 @@
 ---
-import { navigation } from '../../data/navigation';
-import { contacts, site } from '../../data/site';
+import { getNavigation } from '../../data/navigation';
+import { booking, contacts, site } from '../../data/site';
 import Container from '../ui/Container/Container.astro';
 import styles from './Footer.module.scss';
+
+const navItems = getNavigation(Astro.url.pathname);
 ---
 
 <footer class={styles.footer}>
@@ -19,7 +21,7 @@ import styles from './Footer.module.scss';
         <p class={styles.heading}>Навигация</p>
         <ul class={styles.list}>
           {
-            navigation.map((item) => (
+            navItems.map((item) => (
               <li>
                 <a class={styles.link} href={item.href}>
                   {item.label}
@@ -28,7 +30,7 @@ import styles from './Footer.module.scss';
             ))
           }
           <li>
-            <a class={styles.link} href="#booking">Бронирование</a>
+            <a class={styles.link} href={booking.href}>Бронирование</a>
           </li>
         </ul>
       </div>

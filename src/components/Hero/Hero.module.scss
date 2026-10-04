@@ -34,13 +34,22 @@
   }
 }
 
+.videoFrame[data-fit='contain'] .video {
+  object-fit: contain;
+}
+
+.videoFrame[data-fit='cover'] .video {
+  object-fit: cover;
+}
+
 .video {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: var(--hero-media-fit, contain);
+  min-height: 12rem;
   object-position: center center;
   transform: none;
+  -webkit-transform: none;
 }
 
 /* Fallback poster (раскомментировать вместе с блоком в Hero.astro)

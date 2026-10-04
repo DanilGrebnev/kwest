@@ -3,11 +3,27 @@ export type NavItem = {
   href: string;
 };
 
-export const navigation: NavItem[] = [
-  { label: 'О квесте', href: '#about' },
-  { label: 'Атмосфера', href: '#atmosphere' },
-  { label: 'Детали', href: '#details' },
-  { label: 'Галерея', href: '#gallery' },
-  { label: 'Отзывы', href: '#reviews' },
-  { label: 'FAQ', href: '#faq' },
-];
+const sections = [
+  { label: 'О квесте', hash: 'about' },
+  { label: 'Атмосфера', hash: 'atmosphere' },
+  { label: 'Детали', hash: 'details' },
+  { label: 'Галерея', hash: 'gallery' },
+  { label: 'Отзывы', hash: 'reviews' },
+  { label: 'FAQ', hash: 'faq' },
+] as const;
+
+/** Home page: in-page anchors. */
+export const navigation: NavItem[] = sections.map((item) => ({
+  label: item.label,
+  href: `#${item.hash}`,
+}));
+
+/** Inner pages: point back to home + section. */
+export const innerNavigation: NavItem[] = sections.map((item) => ({
+  label: item.label,
+  href: `/#${item.hash}`,
+}));
+
+export function getNavigation(pathname: string): NavItem[] {
+  return pathname === '/' || pathname === '' ? navigation : innerNavigation;
+}

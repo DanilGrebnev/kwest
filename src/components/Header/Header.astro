@@ -1,18 +1,22 @@
 ---
-import { navigation } from '../../data/navigation';
+import { getNavigation } from '../../data/navigation';
 import { booking, site } from '../../data/site';
 import Button from '../ui/Button/Button.astro';
 import styles from './Header.module.scss';
+
+const pathname = Astro.url.pathname;
+const navItems = getNavigation(pathname);
+const homeHref = pathname === '/' || pathname === '' ? '#top' : '/';
 ---
 
 <header class={styles.header} data-header>
   <div class={styles.inner}>
-    <a class={styles.logo} href="#top">{site.name}</a>
+    <a class={styles.logo} href={homeHref}>{site.name}</a>
 
     <nav class={styles.nav} aria-label="Основная">
       <ul class={styles.list}>
         {
-          navigation.map((item) => (
+          navItems.map((item) => (
             <li>
               <a class={styles.link} href={item.href}>
                 {item.label}
@@ -50,7 +54,7 @@ import styles from './Header.module.scss';
     <nav aria-label="Мобильная навигация">
       <ul class={styles.mobileList}>
         {
-          navigation.map((item) => (
+          navItems.map((item) => (
             <li>
               <a class={styles.mobileLink} href={item.href}>
                 {item.label}

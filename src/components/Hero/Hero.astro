@@ -7,7 +7,7 @@ import styles from './Hero.module.scss';
 ---
 
 <section class={styles.hero} aria-labelledby="hero-title">
-  <div class={styles.media} aria-hidden="true">
+  <div class={styles.media}>
     <div class={styles.videoFrame} data-hero-video-frame data-fit="contain">
       <video
         class={styles.video}
@@ -17,10 +17,11 @@ import styles from './Hero.module.scss';
         loop
         playsinline
         webkit-playsinline
-        x5-playsinline
         preload="auto"
-        src={hero.videoSrc}
+        aria-hidden="true"
       >
+        <source src={hero.videoSrc} type="video/mp4" />
+        Ваш браузер не поддерживает тег video.
       </video>
       {/* Fallback: статичный poster вместо видео — раскомментировать блок ниже и стили .fallback в Hero.module.scss
       <div
@@ -31,8 +32,8 @@ import styles from './Hero.module.scss';
       ></div>
       */}
     </div>
-    <div class={styles.overlay}></div>
-    <div class={styles.vignette}></div>
+    <div class={styles.overlay} aria-hidden="true"></div>
+    <div class={styles.vignette} aria-hidden="true"></div>
   </div>
 
   <div class={styles.content}>
