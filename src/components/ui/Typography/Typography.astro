@@ -1,0 +1,25 @@
+---
+import type { TypographyProps } from './typography.types';
+import styles from './Typography.module.scss';
+
+interface Props extends TypographyProps {}
+
+const {
+  as = 'p',
+  size = 'md',
+  weight = 'regular',
+  class: className,
+  id,
+} = Astro.props;
+
+const Tag = as;
+const sizeClass = styles[`size-${size}` as keyof typeof styles];
+const weightClass = styles[`weight-${weight}` as keyof typeof styles];
+---
+
+<Tag
+  id={id}
+  class:list={[styles.root, sizeClass, weightClass, className]}
+>
+  <slot />
+</Tag>

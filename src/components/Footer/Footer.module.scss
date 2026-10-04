@@ -1,0 +1,72 @@
+@use '../../styles/mixins' as *;
+
+.footer {
+  padding-block: var(--space-12) var(--space-8);
+  border-top: 1px solid var(--color-surface-border);
+  background: var(--color-bg-elevated);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-8);
+  margin-bottom: var(--space-10);
+
+  @include respond(md) {
+    grid-template-columns: 1.2fr 1fr 1fr;
+  }
+}
+
+.brand {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+  letter-spacing: var(--letter-spacing-heading);
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.desc {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.heading {
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.link {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+  @include focus-visible;
+
+  &:hover {
+    color: var(--color-text);
+  }
+}
+
+.bottom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-surface-border);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+
+  @include respond(md) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

@@ -1,0 +1,964 @@
+openapi: 3.0.3
+info:
+  title: Cool Quest API
+  version: 1.0.0
+  description: |2
+
+    Публичное API сайта **cool-quest.ru** для каталога квестов, расписания слотов и бронирования.
+
+    ## Общие правила
+
+    - Базовый путь: `/api/v1/public/`
+    - Все даты и время слотов — **часовой пояс Europe/Moscow** (UTC+3), если не указан offset в ISO 8601.
+    - Один слот = одна группа: если слот занят, забронировать его снова нельзя.
+    - Бронирование возможно **не ранее чем за 1 час** до начала слота (`BOOKING_MIN_LEAD_HOURS`).
+    - Расписание учитывает **заглушки** (ScheduleBlock) и существующие брони/активные резервы.
+
+    ## Рекомендуемый сценарий для фронта
+
+    1. `GET /quests/` — список квестов.
+    2. `GET /quests/{id}/` — детали квеста (лимиты игроков, цены, расписание по дням недели).
+    3. `GET /slots/?quest_id=…` — слоты на период; для UI показывать `status` и бронировать только `bookable: true`.
+
+    В ответах квестов поле **`media`** — публичные файлы из каталога (`MediaAsset` с `is_public=true`); **`photo_urls`** и **`video_url`** дополнительно собираются из этих медиа.
+    4. `POST /bookings/` — создание брони одним запросом (игрок + подтверждённая бронь).
+
+    Альтернатива (двухшаговая): `POST /holds/` → `POST /holds/confirm/` (устаревающий сценарий, если нужен резерв на 15 минут).
+  contact:
+    name: cool-quest.ru
+paths:
+  /api/v1/partners/availability/:
+    get:
+      operationId: partners_availability_retrieve
+      description: |2
+
+        Доступные слоты на один день (как public `/availability/`), но с авторизацией партнёра.
+        Опциональный заголовок `Idempotency-Key` для идемпотентных GET (через IdempotencyMixin).
+      summary: Слоты на день (партнёр)
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+        description: Ключ идемпотентности для повторяющихся запросов.
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: query
+        name: quest_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Партнёры
+      security:
+      - PartnerApiKey: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyAvailabilityResponse'
+          description: ''
+  /api/v1/partners/holds/:
+    post:
+      operationId: partners_holds_create
+      description: |2
+
+        Резерв на существующую сессию (`session_id`). Источник брони — `partner`.
+        Заголовок **Idempotency-Key** рекомендуется для безопасных повторов POST.
+      summary: Создать резерв (партнёр)
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+        description: Ключ идемпотентности для повторяющихся запросов.
+      tags:
+      - Партнёры
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnerCreateHold'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PartnerCreateHold'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PartnerCreateHold'
+        required: true
+      security:
+      - PartnerApiKey: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldCreatedResponse'
+          description: ''
+        '400':
+          description: Ошибка валидации или слот недоступен.
+        '401':
+          description: Нет или неверный заголовок X-Api-Key.
+  /api/v1/partners/holds/confirm/:
+    post:
+      operationId: partners_holds_confirm_create
+      description: |2
+
+        Подтверждение резерва. `external_booking_id` сохраняется в брони как `external_id`.
+      summary: Подтвердить резерв (партнёр)
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+        description: Ключ идемпотентности для повторяющихся запросов.
+      tags:
+      - Партнёры
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnerConfirmHold'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PartnerConfirmHold'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PartnerConfirmHold'
+        required: true
+      security:
+      - PartnerApiKey: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerBookingCreatedResponse'
+          description: ''
+        '400':
+          description: Резерв не найден или просрочен.
+        '401':
+          description: Нет или неверный заголовок X-Api-Key.
+  /api/v1/public/availability/:
+    get:
+      operationId: public_availability_retrieve
+      description: |2
+
+        **Legacy:** только **свободные** слоты на **один календарный день** (как в Telegram-боте).
+
+        Для нового фронта предпочтительнее `GET /slots/` с флагами `status` и `bookable`.
+      summary: Свободные слоты на день (legacy)
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+        description: Календарный день (YYYY-MM-DD, Москва).
+        required: true
+      - in: query
+        name: quest_id
+        schema:
+          type: integer
+        description: ID квеста.
+        required: true
+      tags:
+      - Резерв слота (legacy)
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyAvailabilityResponse'
+          description: ''
+  /api/v1/public/bookings/:
+    post:
+      operationId: public_bookings_create
+      description: |2
+
+        Создаёт **подтверждённую** бронь с сайта одним запросом.
+
+        1. Нормализует телефон РФ (`+7XXXXXXXXXX`).
+        2. Создаёт или обновляет игрока (имя, фамилия, email).
+        3. Проверяет, что `starts_at` совпадает со свободным слотом из расписания.
+        4. Создаёт hold и немедленно подтверждает его.
+
+        **Ошибки 400** (`detail`): некорректный телефон, квест не найден, число игроков вне лимитов, время недоступно.
+
+        **Лимит:** 30 запросов в минуту с одного IP (анонимный throttle).
+      summary: Создать бронь (сайт)
+      tags:
+      - Бронирование
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebsiteBooking'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateWebsiteBooking'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateWebsiteBooking'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingCreatedResponse'
+          description: ''
+        '400':
+          description: Ошибка валидации или бизнес-правила (поле detail).
+        '429':
+          description: Превышен лимит запросов.
+  /api/v1/public/holds/:
+    post:
+      operationId: public_holds_create
+      description: |2
+
+        **Legacy:** временный резерв слота (~15 минут) перед подтверждением.
+
+        Укажите **либо** `session_id`, **либо** пару `quest_id` + `starts_at` (не оба варианта).
+      summary: Создать резерв слота (legacy)
+      tags:
+      - Резерв слота (legacy)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHold'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateHold'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateHold'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldCreatedResponse'
+          description: ''
+        '400':
+          description: Ошибка валидации или слот недоступен.
+        '429':
+          description: Превышен лимит запросов.
+  /api/v1/public/holds/confirm/:
+    post:
+      operationId: public_holds_confirm_create
+      description: |2
+
+        **Legacy:** превращает активный hold в подтверждённую бронь. Hold должен быть в статусе pending и не просрочен.
+      summary: Подтвердить резерв (legacy)
+      tags:
+      - Резерв слота (legacy)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmHold'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConfirmHold'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConfirmHold'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingCreatedResponse'
+          description: ''
+        '400':
+          description: Резерв не найден, просрочен или слот занят.
+        '429':
+          description: Превышен лимит запросов.
+  /api/v1/public/quests/:
+    get:
+      operationId: public_quests_list
+      description: |2
+
+        Список **активных** квестов (`is_active=true`), сортировка `sort_order`, затем название.
+
+        В каждом объекте — полное описание для карточки на сайте и вложенные `schedules`
+        (дни недели 0=пн…6=вс, время работы, интервал слотов в минутах).
+      summary: Список квестов
+      tags:
+      - Квесты
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quest'
+          description: ''
+  /api/v1/public/quests/{id}/:
+    get:
+      operationId: public_quests_retrieve
+      description: |2
+
+        Подробная карточка одного активного квеста. При неизвестном или неактивном ID — **404**.
+      summary: Детали квеста
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Квесты
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quest'
+          description: ''
+  /api/v1/public/slots/:
+    get:
+      operationId: public_slots_retrieve
+      description: |2
+
+        Возвращает **все** слоты по расписанию квеста за период (включая занятые).
+
+        **Query-параметры:**
+        - `quest_id` (обязательный) — ID активного квеста.
+        - `from_date` — начало периода (YYYY-MM-DD). По умолчанию: сегодня.
+        - `to_date` — конец периода. По умолчанию: сегодня + 30 дней.
+
+        Период автоматически обрезается: не раньше сегодня и не дальше **30 дней** вперёд.
+
+        **Логика статуса:**
+        - Заглушка на время → `занято`, `bookable: false`
+        - Уже есть бронь или активный hold → `занято`
+        - Слот в прошлом или менее чем за 1 час до старта → `занято` (не `bookable`)
+        - Иначе → `свободно`, `bookable: true`
+      summary: Расписание слотов за период
+      parameters:
+      - in: query
+        name: from_date
+        schema:
+          type: string
+          format: date
+        description: Начало периода (YYYY-MM-DD). По умолчанию — сегодня (Москва).
+      - in: query
+        name: quest_id
+        schema:
+          type: integer
+        description: ID квеста.
+        required: true
+      - in: query
+        name: to_date
+        schema:
+          type: string
+          format: date
+        description: Конец периода. По умолчанию — сегодня + 30 дней.
+      tags:
+      - Расписание слотов
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotScheduleResponse'
+          description: ''
+  /api/v1/staff/sessions/:
+    get:
+      operationId: staff_sessions_list
+      tags:
+      - staff
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StaffGameSession'
+          description: ''
+  /api/v1/staff/sessions/{id}/:
+    get:
+      operationId: staff_sessions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this игровой слот.
+        required: true
+      tags:
+      - staff
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffGameSession'
+          description: ''
+components:
+  schemas:
+    BookingCreatedResponse:
+      type: object
+      properties:
+        booking_id:
+          type: integer
+        session_id:
+          type: integer
+        player_count:
+          type: integer
+        starts_at:
+          type: string
+          format: date-time
+      required:
+      - booking_id
+      - player_count
+      - session_id
+      - starts_at
+    ConfirmHold:
+      type: object
+      properties:
+        hold_id:
+          type: integer
+          description: ID резерва из POST /holds/.
+        primary_player_id:
+          type: integer
+          description: ID игрока-заказчика.
+        notes:
+          type: string
+          default: ''
+          description: Комментарий к брони.
+      required:
+      - hold_id
+      - primary_player_id
+    CreateHold:
+      type: object
+      properties:
+        session_id:
+          type: integer
+          nullable: true
+          description: ID существующей сессии.
+        quest_id:
+          type: integer
+          nullable: true
+          description: ID квеста (вместе с starts_at).
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Время старта слота (вместе с quest_id).
+        seats:
+          type: integer
+          minimum: 1
+          description: Количество мест в резерве.
+        primary_player_id:
+          type: integer
+          nullable: true
+          description: ID игрока, если уже известен.
+      required:
+      - seats
+    CreateWebsiteBooking:
+      type: object
+      properties:
+        quest_id:
+          type: integer
+          description: ID квеста из GET /quests/.
+        starts_at:
+          type: string
+          format: date-time
+          description: Время начала слота из GET /slots/ (поле starts_at у слота с
+            bookable=true).
+        player_count:
+          type: integer
+          minimum: 1
+          description: Число игроков; должно быть между min_players и max_players
+            квеста.
+        first_name:
+          type: string
+          description: Имя контактного лица.
+          maxLength: 100
+        last_name:
+          type: string
+          default: ''
+          description: Фамилия (можно пустую строку).
+          maxLength: 100
+        phone:
+          type: string
+          description: 'Телефон РФ: +7XXXXXXXXXX, 8XXXXXXXXXX или 10 цифр без кода
+            страны.'
+          maxLength: 32
+        email:
+          type: string
+          format: email
+          description: Email для связи.
+        min_player_age:
+          type: integer
+          maximum: 99
+          minimum: 1
+          nullable: true
+          description: Минимальный возраст участников (опционально).
+      required:
+      - email
+      - first_name
+      - phone
+      - player_count
+      - quest_id
+      - starts_at
+    HoldCreatedResponse:
+      type: object
+      properties:
+        hold_id:
+          type: integer
+        expires_at:
+          type: string
+          format: date-time
+          description: Резерв истекает через BOOKING_HOLD_MINUTES (15 мин).
+        seats:
+          type: integer
+      required:
+      - expires_at
+      - hold_id
+      - seats
+    LegacyAvailabilityResponse:
+      type: object
+      properties:
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegacyAvailabilitySlot'
+      required:
+      - slots
+    LegacyAvailabilitySlot:
+      type: object
+      properties:
+        session_id:
+          type: integer
+          nullable: true
+        starts_at:
+          type: string
+        ends_at:
+          type: string
+        available_seats:
+          type: integer
+        capacity:
+          type: integer
+      required:
+      - available_seats
+      - capacity
+      - ends_at
+      - session_id
+      - starts_at
+    MediaTypeEnum:
+      enum:
+      - photo
+      - video
+      - other
+      type: string
+      description: |-
+        * `photo` - photo
+        * `video` - video
+        * `other` - other
+    PartnerBookingCreatedResponse:
+      type: object
+      properties:
+        booking_id:
+          type: integer
+        external_booking_id:
+          type: string
+        session_id:
+          type: integer
+      required:
+      - booking_id
+      - external_booking_id
+      - session_id
+    PartnerConfirmHold:
+      type: object
+      properties:
+        hold_id:
+          type: integer
+        primary_player_id:
+          type: integer
+        external_booking_id:
+          type: string
+          default: ''
+      required:
+      - hold_id
+      - primary_player_id
+    PartnerCreateHold:
+      type: object
+      properties:
+        session_id:
+          type: integer
+        seats:
+          type: integer
+          minimum: 1
+        external_booking_id:
+          type: string
+          default: ''
+      required:
+      - seats
+      - session_id
+    PublicSlot:
+      type: object
+      properties:
+        starts_at:
+          type: string
+          format: date-time
+          description: Начало слота (ISO 8601, aware datetime).
+        ends_at:
+          type: string
+          format: date-time
+          description: Конец слота.
+        session_id:
+          type: integer
+          nullable: true
+          description: ID игровой сессии, если уже материализована в БД; иначе null.
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PublicSlotStatusEnum'
+          description: |-
+            «свободно» — нет брони/резерва и слот не заблокирован; «занято» — иначе.
+
+            * `свободно` - свободно
+            * `занято` - занято
+        bookable:
+          type: boolean
+          description: 'true только если слот можно выбрать для POST /bookings/: учтены
+            заглушки, занятость, правило +1 час и активность квеста.'
+      required:
+      - bookable
+      - ends_at
+      - session_id
+      - starts_at
+      - status
+    PublicSlotStatusEnum:
+      enum:
+      - свободно
+      - занято
+      type: string
+      description: |-
+        * `свободно` - свободно
+        * `занято` - занято
+    Quest:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: Название
+          maxLength: 255
+        description:
+          type: string
+          title: Описание
+        summary:
+          type: string
+          title: Краткое описание
+          maxLength: 500
+        features:
+          type: string
+          title: Особенности
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestMedia'
+          readOnly: true
+          description: Публичные медиа квеста из каталога (фото, видео и др.).
+        photo_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: 'URL фото: поле квеста + публичные photo из media (без дубликатов).'
+        video_url:
+          description: 'Видео: video_url квеста или первое публичное video из media.'
+          oneOf:
+          - type: string
+            format: uri
+          - type: string
+            maxLength: 0
+        standard_players_label:
+          type: string
+          title: Стандартное число игроков
+          maxLength: 64
+        standard_players:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Стандартное кол-во игроков (для цены)
+          description: Базовая цена за это число игроков; выше — доплата за каждого
+        min_players:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Мин. игроков
+        max_players:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Макс. игроков
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          description: Базовая цена (зависит от модели ценообразования квеста).
+        extra_player_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          description: Доплата за игрока сверх standard_players (0 — цена = base ×
+            игроков).
+        difficulty:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Сложность
+        scariness:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Страшность
+        age_rating:
+          type: string
+          title: Возраст
+          maxLength: 32
+        categories:
+          type: array
+          items:
+            type: string
+          description: Теги/категории квеста.
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          nullable: true
+          title: Рейтинг
+        duration_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Длительность, мин
+        backstory:
+          type: string
+          title: Предыстория
+        address:
+          type: string
+          title: Адрес
+          maxLength: 500
+        sort_order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Порядок
+        schedules:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestSchedule'
+          readOnly: true
+      required:
+      - age_rating
+      - base_price
+      - categories
+      - description
+      - difficulty
+      - extra_player_price
+      - id
+      - max_players
+      - media
+      - min_players
+      - photo_urls
+      - scariness
+      - schedules
+      - title
+    QuestMedia:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID медиа-объекта.
+        title:
+          type: string
+          description: Подпись (может быть пустой).
+        url:
+          type: string
+          format: uri
+          description: Прямая ссылка на файл.
+        media_type:
+          allOf:
+          - $ref: '#/components/schemas/MediaTypeEnum'
+          description: |-
+            Тип файла из каталога медиа (только is_public=true).
+
+            * `photo` - photo
+            * `video` - video
+            * `other` - other
+      required:
+      - id
+      - media_type
+      - title
+      - url
+    QuestSchedule:
+      type: object
+      properties:
+        weekdays:
+          type: array
+          items:
+            type: integer
+            maximum: 6
+            minimum: 0
+          description: 'Дни недели: 0=понедельник … 6=воскресенье.'
+        opens_at:
+          type: string
+          format: time
+          description: Время начала приёма слотов в этот день.
+        closes_at:
+          type: string
+          format: time
+          description: Время окончания; 00:00 при opens_at>00:00 означает полночь
+            следующего дня.
+        slot_interval_minutes:
+          type: integer
+          description: Шаг между стартами слотов в минутах.
+      required:
+      - closes_at
+      - opens_at
+      - slot_interval_minutes
+      - weekdays
+    SlotScheduleResponse:
+      type: object
+      properties:
+        quest_id:
+          type: integer
+        from_date:
+          type: string
+          format: date
+          description: Фактическое начало периода (после ограничений).
+        to_date:
+          type: string
+          format: date
+          description: Фактический конец периода (не более 30 дней вперёд).
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSlot'
+      required:
+      - from_date
+      - quest_id
+      - slots
+      - to_date
+    StaffGameSession:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        quest:
+          type: integer
+          title: Квест
+        quest_title:
+          type: string
+          readOnly: true
+        starts_at:
+          type: string
+          format: date-time
+          title: Начало
+        ends_at:
+          type: string
+          format: date-time
+          title: Конец
+        status:
+          $ref: '#/components/schemas/StaffGameSessionStatusEnum'
+      required:
+      - ends_at
+      - id
+      - quest
+      - quest_title
+      - starts_at
+    StaffGameSessionStatusEnum:
+      enum:
+      - open
+      - cancelled
+      - closed
+      type: string
+      description: |-
+        * `open` - Открыт
+        * `cancelled` - Отменён
+        * `closed` - Закрыт
+  securitySchemes:
+    PartnerApiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: API-ключ партнёра (активный PartnerApiKey).
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+tags:
+- name: Квесты
+  description: Каталог активных квестов и расписание по дням недели.
+- name: Расписание слотов
+  description: Слоты с признаками свободно/занято и возможностью бронирования.
+- name: Бронирование
+  description: Создание подтверждённой брони с сайта.
+- name: Резерв слота (legacy)
+  description: Двухшаговый hold + confirm (устаревающий сценарий).
+- name: Партнёры
+  description: 'API для партнёров: ключ X-Api-Key, hold и confirm по session_id.'

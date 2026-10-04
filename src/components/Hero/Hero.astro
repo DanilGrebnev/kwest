@@ -1,0 +1,75 @@
+---
+import { booking, hero, site, stats } from '../../data/site';
+import Button from '../ui/Button/Button.astro';
+import Container from '../ui/Container/Container.astro';
+import Typography from '../ui/Typography/Typography.astro';
+import styles from './Hero.module.scss';
+---
+
+<section class={styles.hero} aria-labelledby="hero-title">
+  <div class={styles.media} aria-hidden="true">
+    <div class={styles.videoFrame} data-hero-video-frame data-fit="contain">
+      <video
+        class={styles.video}
+        data-hero-video
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster={hero.posterSrc}
+      >
+        <source src={hero.videoSrc} type="video/mp4" />
+      </video>
+      <div class={styles.fallback} role="img" aria-label=""></div>
+    </div>
+    <div class={styles.overlay}></div>
+    <div class={styles.vignette}></div>
+  </div>
+
+  <div class={styles.content}>
+    <Container>
+      <div class={styles.inner}>
+        <p class={styles.eyebrow}>Хоррор-перформанс · 18+</p>
+
+        <Typography
+          as="h1"
+          size="hero"
+          weight="regular"
+          id="hero-title"
+          class={styles.title}
+        >
+          {site.name}
+        </Typography>
+
+        <Typography as="p" size="lg" weight="medium" class={styles.slogan}>
+          {hero.slogan}
+        </Typography>
+
+        <Typography as="p" size="md" class={styles.lead}>
+          {hero.lead}
+        </Typography>
+
+        <div class={styles.actions}>
+          <Button href={booking.href} variant="primary" fullWidth>
+            {booking.label}
+          </Button>
+          <Button href="#about" variant="ghost" fullWidth>
+            Узнать сюжет
+          </Button>
+        </div>
+
+        <ul class={styles.stats}>
+          {
+            stats.map((item) => (
+              <li class={styles.stat}>
+                <span class={styles.statLabel}>{item.label}</span>
+                <span class={styles.statDesc}>{item.description}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </Container>
+  </div>
+</section>

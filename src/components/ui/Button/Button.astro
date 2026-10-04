@@ -1,0 +1,42 @@
+---
+import styles from './Button.module.scss';
+
+type Variant = 'primary' | 'ghost' | 'link';
+
+interface Props {
+  href?: string;
+  variant?: Variant;
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+  fullWidth?: boolean;
+  ariaLabel?: string;
+}
+
+const {
+  href,
+  variant = 'primary',
+  type = 'button',
+  class: className,
+  fullWidth = false,
+  ariaLabel,
+} = Astro.props;
+
+const classes = [
+  styles.root,
+  styles[variant],
+  fullWidth ? styles.fullWidth : undefined,
+  className,
+];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} aria-label={ariaLabel}>
+      <slot />
+    </a>
+  ) : (
+    <button type={type} class:list={classes} aria-label={ariaLabel}>
+      <slot />
+    </button>
+  )
+}

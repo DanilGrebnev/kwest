@@ -1,0 +1,57 @@
+@use '../../styles/mixins' as *;
+
+.section {
+  position: relative;
+  overflow: hidden;
+}
+
+.panel {
+  position: relative;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(196, 30, 30, 0.35);
+  background:
+    radial-gradient(ellipse at top right, rgba(196, 30, 30, 0.18), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(26, 138, 138, 0.12), transparent 50%),
+    var(--color-surface);
+  box-shadow: var(--shadow-glow-red);
+  text-align: center;
+}
+
+.eyebrow {
+  margin-bottom: var(--space-3);
+  color: var(--color-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-bottom: var(--space-4);
+}
+
+.lead {
+  margin-inline: auto;
+  margin-bottom: var(--space-8);
+  color: var(--color-text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: center;
+
+  @include respond(sm) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+.note {
+  margin-top: var(--space-6);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}

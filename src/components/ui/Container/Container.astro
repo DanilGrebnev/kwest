@@ -1,0 +1,14 @@
+---
+import styles from './Container.module.scss';
+
+interface Props {
+  class?: string;
+  as?: 'div' | 'section' | 'article';
+}
+
+const { class: className, as: Tag = 'div' } = Astro.props;
+---
+
+<Tag class:list={[styles.root, className]}>
+  <slot />
+</Tag>

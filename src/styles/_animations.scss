@@ -1,0 +1,58 @@
+@keyframes slowZoom {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes logoGlitch {
+  0%,
+  100% {
+    transform: translate(0);
+    text-shadow: none;
+  }
+
+  20% {
+    transform: translate(-1px, 1px);
+    text-shadow:
+      1px 0 var(--color-primary-bright),
+      -1px 0 var(--color-secondary);
+  }
+
+  40% {
+    transform: translate(1px, -1px);
+    text-shadow:
+      -1px 0 var(--color-primary-bright),
+      1px 0 var(--color-secondary);
+  }
+
+  60% {
+    transform: translate(-1px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

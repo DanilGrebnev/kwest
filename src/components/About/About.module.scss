@@ -1,0 +1,59 @@
+@use '../../styles/mixins' as *;
+
+.grid {
+  display: grid;
+  gap: var(--space-8);
+
+  @include respond(lg) {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: var(--space-12);
+    align-items: start;
+  }
+}
+
+.eyebrow {
+  margin-bottom: var(--space-3);
+  color: var(--color-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-bottom: var(--space-6);
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.paragraph {
+  color: var(--color-text-muted);
+}
+
+.aside {
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.asideTitle {
+  margin-bottom: var(--space-3);
+  color: var(--color-primary-bright);
+}
+
+.asideText {
+  margin-bottom: var(--space-6);
+  color: var(--color-text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

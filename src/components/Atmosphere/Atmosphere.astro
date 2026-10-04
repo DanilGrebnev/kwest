@@ -1,0 +1,45 @@
+---
+import { features } from '../../data/features';
+import Container from '../ui/Container/Container.astro';
+import Typography from '../ui/Typography/Typography.astro';
+import styles from './Atmosphere.module.scss';
+---
+
+<section
+  class="section"
+  id="atmosphere"
+  aria-labelledby="atmosphere-title"
+>
+  <Container>
+    <div class={`reveal ${styles.header}`}>
+      <p class={styles.eyebrow}>Атмосфера</p>
+      <Typography
+        as="h2"
+        size="2xl"
+        id="atmosphere-title"
+        class={styles.title}
+      >
+        Что делает темноту настоящей
+      </Typography>
+      <Typography as="p" size="md" class={styles.lead}>
+        Мы собираем хоррор из деталей: свет, звук, присутствие актёра и ощущение,
+        что пространство реагирует на вас.
+      </Typography>
+    </div>
+
+    <ul class={`reveal ${styles.grid}`}>
+      {
+        features.map((feature) => (
+          <li class={styles.card}>
+            <Typography as="h3" size="xl" class={styles.cardTitle}>
+              {feature.title}
+            </Typography>
+            <Typography as="p" size="sm" class={styles.cardText}>
+              {feature.description}
+            </Typography>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>

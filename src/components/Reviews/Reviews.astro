@@ -1,0 +1,36 @@
+---
+import { reviews } from '../../data/reviews';
+import Container from '../ui/Container/Container.astro';
+import Typography from '../ui/Typography/Typography.astro';
+import styles from './Reviews.module.scss';
+---
+
+<section class="section section--alt" id="reviews" aria-labelledby="reviews-title">
+  <Container>
+    <div class={`reveal ${styles.header}`}>
+      <p class={styles.eyebrow}>Отзывы</p>
+      <Typography as="h2" size="2xl" id="reviews-title" class={styles.title}>
+        Те, кто уже вышел
+      </Typography>
+      <Typography as="p" size="md" class={styles.lead}>
+        Короткие впечатления игроков — без спойлеров и без маркетинговой воды.
+      </Typography>
+    </div>
+
+    <ul class={`reveal ${styles.grid}`}>
+      {
+        reviews.map((review) => (
+          <li class={styles.card}>
+            <Typography as="p" size="md" class={styles.text}>
+              «{review.text}»
+            </Typography>
+            <div class={styles.meta}>
+              <span class={styles.name}>{review.name}</span>
+              <span class={styles.info}>{review.meta}</span>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>

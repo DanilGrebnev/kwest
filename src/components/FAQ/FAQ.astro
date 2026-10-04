@@ -1,0 +1,36 @@
+---
+import { faq } from '../../data/faq';
+import Container from '../ui/Container/Container.astro';
+import Typography from '../ui/Typography/Typography.astro';
+import styles from './FAQ.module.scss';
+---
+
+<section class="section" id="faq" aria-labelledby="faq-title">
+  <Container>
+    <div class={`reveal ${styles.layout}`}>
+      <div>
+        <p class={styles.eyebrow}>FAQ</p>
+        <Typography as="h2" size="2xl" id="faq-title" class={styles.title}>
+          Частые вопросы
+        </Typography>
+        <Typography as="p" size="md" class={styles.lead}>
+          Коротко о страхе, безопасности и том, как проходит игра. Если чего-то
+          нет в списке — напишите нам перед бронированием.
+        </Typography>
+      </div>
+
+      <div class={styles.list}>
+        {
+          faq.map((item) => (
+            <details class={styles.item}>
+              <summary class={styles.summary}>{item.question}</summary>
+              <Typography as="p" size="sm" class={styles.answer}>
+                {item.answer}
+              </Typography>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </Container>
+</section>

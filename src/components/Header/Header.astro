@@ -1,0 +1,71 @@
+---
+import { navigation } from '../../data/navigation';
+import { booking, site } from '../../data/site';
+import Button from '../ui/Button/Button.astro';
+import styles from './Header.module.scss';
+---
+
+<header class={styles.header} data-header>
+  <div class={styles.inner}>
+    <a class={styles.logo} href="#top">{site.name}</a>
+
+    <nav class={styles.nav} aria-label="Основная">
+      <ul class={styles.list}>
+        {
+          navigation.map((item) => (
+            <li>
+              <a class={styles.link} href={item.href}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class={styles.actions}>
+      <Button href={booking.href} variant="primary">{booking.label}</Button>
+    </div>
+
+    <button
+      class={styles.toggle}
+      type="button"
+      aria-label="Открыть меню"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      data-menu-toggle
+    >
+      <span class={styles.bar} aria-hidden="true"></span>
+      <span class={styles.bar} aria-hidden="true"></span>
+      <span class={styles.bar} aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <div
+    class={styles.mobile}
+    id="mobile-menu"
+    data-mobile-menu
+    hidden={false}
+  >
+    <nav aria-label="Мобильная навигация">
+      <ul class={styles.mobileList}>
+        {
+          navigation.map((item) => (
+            <li>
+              <a class={styles.mobileLink} href={item.href}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <Button href={booking.href} variant="primary" fullWidth>
+      {booking.label}
+    </Button>
+  </div>
+</header>
+
+<script>
+  import './header.client.ts';
+</script>

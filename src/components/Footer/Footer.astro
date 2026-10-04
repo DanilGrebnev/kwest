@@ -1,0 +1,57 @@
+---
+import { navigation } from '../../data/navigation';
+import { contacts, site } from '../../data/site';
+import Container from '../ui/Container/Container.astro';
+import styles from './Footer.module.scss';
+---
+
+<footer class={styles.footer}>
+  <Container>
+    <div class={styles.grid}>
+      <div>
+        <p class={styles.brand}>{site.name}</p>
+        <p class={styles.desc}>
+          Хоррор-квест с актёрами. Темнота, зеркала и час, который сложно забыть.
+        </p>
+      </div>
+
+      <div>
+        <p class={styles.heading}>Навигация</p>
+        <ul class={styles.list}>
+          {
+            navigation.map((item) => (
+              <li>
+                <a class={styles.link} href={item.href}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <a class={styles.link} href="#booking">Бронирование</a>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <p class={styles.heading}>Контакты</p>
+        <ul class={styles.list}>
+          <li>
+            <a class={styles.link} href={contacts.phoneHref}>{contacts.phone}</a>
+          </li>
+          <li>
+            <a class={styles.link} href={contacts.emailHref}>{contacts.email}</a>
+          </li>
+          <li>
+            <span class={styles.link}>{contacts.address}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class={styles.bottom}>
+      <p>© {site.year} {site.name}. Все права защищены.</p>
+      <p>18+ · Стоп-слово обязательно · Играйте ответственно</p>
+    </div>
+  </Container>
+</footer>

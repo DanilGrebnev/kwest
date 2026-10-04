@@ -1,0 +1,32 @@
+---
+import { details } from '../../data/features';
+import Container from '../ui/Container/Container.astro';
+import Typography from '../ui/Typography/Typography.astro';
+import styles from './Details.module.scss';
+---
+
+<section class="section section--alt" id="details" aria-labelledby="details-title">
+  <Container>
+    <div class={`reveal ${styles.header}`}>
+      <p class={styles.eyebrow}>Перед игрой</p>
+      <Typography as="h2" size="2xl" id="details-title" class={styles.title}>
+        Характеристики квеста
+      </Typography>
+      <Typography as="p" size="md" class={styles.lead}>
+        Всё, что стоит знать до бронирования: формат, ограничения и то, как
+        подготовиться к часу в темноте.
+      </Typography>
+    </div>
+
+    <dl class={`reveal ${styles.grid}`}>
+      {
+        details.map((item) => (
+          <div class={styles.item}>
+            <dt class={styles.label}>{item.label}</dt>
+            <dd class={styles.value}>{item.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </Container>
+</section>

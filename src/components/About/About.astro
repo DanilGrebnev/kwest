@@ -1,0 +1,50 @@
+---
+import { about, booking } from '../../data/site';
+import Button from '../ui/Button/Button.astro';
+import Container from '../ui/Container/Container.astro';
+import Typography from '../ui/Typography/Typography.astro';
+import styles from './About.module.scss';
+---
+
+<section class="section section--alt" id="about" aria-labelledby="about-title">
+  <Container>
+    <div class={`reveal ${styles.grid}`}>
+      <div>
+        <p class={styles.eyebrow}>{about.eyebrow}</p>
+        <Typography
+          as="h2"
+          size="2xl"
+          weight="regular"
+          id="about-title"
+          class={styles.title}
+        >
+          {about.title}
+        </Typography>
+        <div class={styles.copy}>
+          {
+            about.paragraphs.map((text) => (
+              <Typography as="p" size="md" class={styles.paragraph}>
+                {text}
+              </Typography>
+            ))
+          }
+        </div>
+      </div>
+
+      <aside class={styles.aside}>
+        <Typography as="h3" size="xl" class={styles.asideTitle}>
+          Правило одно
+        </Typography>
+        <Typography as="p" size="md" class={styles.asideText}>
+          Когда свет гаснет, не смотрите в зеркало слишком долго. И не
+          оборачивайтесь, если услышите своё имя — особенно если рядом все молчат.
+        </Typography>
+        <div class={styles.actions}>
+          <Button href={booking.href} variant="primary">
+            {booking.secondaryLabel}
+          </Button>
+        </div>
+      </aside>
+    </div>
+  </Container>
+</section>

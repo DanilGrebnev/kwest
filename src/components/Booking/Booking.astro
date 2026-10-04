@@ -1,0 +1,42 @@
+---
+import { booking, contacts } from '../../data/site';
+import Button from '../ui/Button/Button.astro';
+import Container from '../ui/Container/Container.astro';
+import Typography from '../ui/Typography/Typography.astro';
+import styles from './Booking.module.scss';
+---
+
+<section
+  class={`section section--alt ${styles.section}`}
+  id="booking"
+  aria-labelledby="booking-title"
+>
+  <Container>
+    <div class={`reveal ${styles.panel}`}>
+      <p class={styles.eyebrow}>Бронирование</p>
+      <Typography as="h2" size="2xl" id="booking-title" class={styles.title}>
+        Готовы погасить свет?
+      </Typography>
+      <Typography as="p" size="lg" class={styles.lead}>
+        Выберите дату, соберите команду и зайдите в дом, где отражения живут
+        своей жизнью. Мест немного — темнота не любит толпу.
+      </Typography>
+
+      <div class={styles.actions}>
+        {/* href comes from site.booking — replace with external URL later */}
+        <Button href={booking.href} variant="primary">
+          {booking.finalLabel}
+        </Button>
+        <Button href={contacts.emailHref} variant="ghost">
+          Написать нам
+        </Button>
+      </div>
+
+      <p class={styles.note}>
+        Или напишите на{' '}
+        <a href={contacts.emailHref}>{contacts.email}</a>
+        — ответим и подскажем ближайшие слоты.
+      </p>
+    </div>
+  </Container>
+</section>
