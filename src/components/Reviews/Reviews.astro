@@ -1,5 +1,5 @@
 ---
-import { reviews } from '../../data/reviews';
+import { featuredReviews, moreReviews } from '../../data/reviews';
 import Container from '../ui/Container/Container.astro';
 import Typography from '../ui/Typography/Typography.astro';
 import styles from './Reviews.module.scss';
@@ -19,9 +19,9 @@ import styles from './Reviews.module.scss';
 
     <ul class={`reveal ${styles.grid}`}>
       {
-        reviews.map((review) => (
+        featuredReviews.map((review) => (
           <li class={styles.card}>
-            <Typography as="p" size="md" class={styles.text}>
+            <Typography as="p" size="sm" class={styles.text}>
               «{review.text}»
             </Typography>
             <div class={styles.meta}>
@@ -32,5 +32,42 @@ import styles from './Reviews.module.scss';
         ))
       }
     </ul>
+
+    <ul
+      id="reviews-more-list"
+      class={`${styles.grid} ${styles.more}`}
+      data-reviews-more
+      data-open="false"
+    >
+      {
+        moreReviews.map((review) => (
+          <li class={styles.card}>
+            <Typography as="p" size="sm" class={styles.text}>
+              «{review.text}»
+            </Typography>
+            <div class={styles.meta}>
+              <span class={styles.name}>{review.name}</span>
+              <span class={styles.info}>{review.meta}</span>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class={`reveal ${styles.actions}`}>
+      <button
+        type="button"
+        class={styles.moreButton}
+        data-reviews-toggle
+        aria-expanded="false"
+        aria-controls="reviews-more-list"
+      >
+        Посмотреть все отзывы
+      </button>
+    </div>
   </Container>
 </section>
+
+<script>
+  import './reviews.client.ts';
+</script>

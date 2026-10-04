@@ -3,37 +3,52 @@ import { gallery } from '../../data/gallery';
 import Container from '../ui/Container/Container.astro';
 import Typography from '../ui/Typography/Typography.astro';
 import styles from './Gallery.module.scss';
+
+interface Props {
+  embedded?: boolean;
+}
+
+const { embedded = false } = Astro.props;
+const loopSlides = [...gallery, ...gallery];
+const Tag = embedded ? 'div' : 'section';
 ---
 
-<section class="section" id="gallery" aria-labelledby="gallery-title">
-  <Container>
-    <div class={`reveal ${styles.header}`}>
+<Tag
+  class:list={[embedded ? styles.embedded : styles.section]}
+  id={embedded ? undefined : 'gallery'}
+  aria-labelledby="gallery-title"
+>
+  <Container class:list={[styles.container, embedded ? styles.containerEmbedded : undefined]}>
+    <div class={`reveal ${styles.header}`} id={embedded ? 'gallery' : undefined}>
       <p class={styles.eyebrow}>Визуальный ряд</p>
       <Typography as="h2" size="2xl" id="gallery-title" class={styles.title}>
         Кадры из темноты
       </Typography>
-      <Typography as="p" size="md" class={styles.lead}>
-        Настроение квеста — без спойлеров сюжета. То, что ждёт вас за дверью,
-        всё равно окажется ближе.
-      </Typography>
     </div>
-
-    <ul class={`reveal ${styles.grid}`}>
-      {
-        gallery.map((item) => (
-          <li class={styles.item}>
-            <img
-              class={styles.image}
-              src={item.src}
-              alt={item.alt}
-              loading="lazy"
-              decoding="async"
-              width="800"
-              height="1000"
-            />
-          </li>
-        ))
-      }
-    </ul>
   </Container>
-</section>
+
+  <div class={`reveal ${styles.carouselOuter}`}>
+    <div class={styles.viewport} data-gallery-carousel>
+      <ul class={styles.track} aria-label="Галерея кадров">
+        {
+          loopSlides.map((item, index) => (
+            <li
+              class={styles.item}
+              aria-hidden={index >= gallery.length ? 'true' : undefined}
+            >
+              <img
+                class={styles.image}
+                src={item.src}
+                alt={index >= gallery.length ? '' : item.alt}
+                loading="lazy"
+                decoding="async"
+                width="800"
+                height="1000"
+              />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</Tag>

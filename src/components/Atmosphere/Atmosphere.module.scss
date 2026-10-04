@@ -1,8 +1,13 @@
 @use '../../styles/mixins' as *;
 
+.root {
+  padding-block-end: var(--section-padding-y);
+}
+
 .header {
-  max-width: 36rem;
-  margin-bottom: var(--space-10);
+  width: 100%;
+  max-width: none;
+  margin-bottom: var(--space-6);
 }
 
 .eyebrow {
@@ -15,48 +20,17 @@
 }
 
 .title {
+  max-width: none;
   margin-bottom: var(--space-4);
 }
 
 .lead {
+  max-width: none;
   color: var(--color-text-muted);
 }
 
-.grid {
-  display: grid;
-  gap: var(--space-4);
-
-  @include respond(md) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @include respond(lg) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.card {
-  height: 100%;
-  padding: var(--space-6);
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-surface-border);
-  border-radius: var(--radius-lg);
-  transition:
-    border-color var(--transition-normal),
-    transform var(--transition-normal),
-    box-shadow var(--transition-normal);
-
-  &:hover {
-    border-color: rgba(196, 30, 30, 0.45);
-    box-shadow: 0 0 24px rgba(196, 30, 30, 0.12);
-    transform: translateY(-2px);
-  }
-}
-
-.cardTitle {
-  margin-bottom: var(--space-3);
-}
-
-.cardText {
-  color: var(--color-text-muted);
+.trap {
+  width: 100%;
+  margin-bottom: var(--space-2);
+  padding-block: var(--space-2);
 }

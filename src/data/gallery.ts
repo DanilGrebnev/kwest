@@ -24,4 +24,8 @@ export const gallery: GalleryItem[] = [
     src: '/poster-5.jpg',
     alt: 'Крупный план — рука сущности закрывает рот жертвы',
   },
+  {
+    src: '/poster-6.png',
+    alt: 'Атмосферный кадр из квеста «И гаснет свет»',
+  },
 ];

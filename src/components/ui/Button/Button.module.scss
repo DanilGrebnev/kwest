@@ -58,6 +58,29 @@
   }
 }
 
+.inverted {
+  color: var(--color-primary);
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    -16px 0 28px var(--color-primary-glow),
+    16px 0 28px var(--color-primary-glow),
+    0 0 24px rgba(255, 255, 255, 0.15);
+
+  &:hover {
+    color: var(--color-primary-bright);
+    box-shadow:
+      -20px 0 36px rgba(196, 30, 30, 0.55),
+      20px 0 36px rgba(196, 30, 30, 0.55),
+      0 0 32px rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
 .ghost {
   color: var(--color-text);
   background: transparent;

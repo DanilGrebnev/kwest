@@ -1,12 +1,13 @@
 ---
-import { features } from '../../data/features';
+import Gallery from '../Gallery/Gallery.astro';
+import AtmosphereTrapGrid from './AtmosphereTrapGrid';
 import Container from '../ui/Container/Container.astro';
 import Typography from '../ui/Typography/Typography.astro';
 import styles from './Atmosphere.module.scss';
 ---
 
 <section
-  class="section"
+  class={`section ${styles.root}`}
   id="atmosphere"
   aria-labelledby="atmosphere-title"
 >
@@ -27,19 +28,10 @@ import styles from './Atmosphere.module.scss';
       </Typography>
     </div>
 
-    <ul class={`reveal ${styles.grid}`}>
-      {
-        features.map((feature) => (
-          <li class={styles.card}>
-            <Typography as="h3" size="xl" class={styles.cardTitle}>
-              {feature.title}
-            </Typography>
-            <Typography as="p" size="sm" class={styles.cardText}>
-              {feature.description}
-            </Typography>
-          </li>
-        ))
-      }
-    </ul>
+    <div class={styles.trap}>
+      <AtmosphereTrapGrid client:visible />
+    </div>
   </Container>
+
+  <Gallery embedded />
 </section>

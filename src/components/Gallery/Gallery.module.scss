@@ -1,8 +1,29 @@
 @use '../../styles/mixins' as *;
 
+.section {
+  position: relative;
+  padding-block: var(--section-padding-y);
+}
+
+.embedded {
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-surface-border);
+}
+
+.container {
+  margin-bottom: var(--space-5);
+}
+
+.containerEmbedded {
+  margin-bottom: var(--space-4);
+  padding-inline: var(--container-padding);
+  max-width: var(--container-max);
+  margin-inline: auto;
+}
+
 .header {
   max-width: 36rem;
-  margin-bottom: var(--space-10);
 }
 
 .eyebrow {
@@ -15,49 +36,51 @@
 }
 
 .title {
-  margin-bottom: var(--space-4);
+  margin-bottom: 0;
 }
 
-.lead {
-  color: var(--color-text-muted);
+.carouselOuter {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
 }
 
-.grid {
-  display: grid;
+.viewport {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 5%,
+    #000 95%,
+    transparent 100%
+  );
+}
+
+.track {
+  display: flex;
   gap: var(--space-3);
+  width: max-content;
+  margin: 0;
+  padding-block: var(--space-1);
+  animation: galleryMarquee 48s linear infinite;
 
-  @include respond(md) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @include respond(lg) {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+  &:hover {
+    animation-play-state: paused;
   }
 }
 
 .item {
-  position: relative;
+  flex: 0 0 min(52vw, 13rem);
   overflow: hidden;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-surface-border);
   background: var(--color-surface);
   aspect-ratio: 3 / 4;
 
-  @include respond(lg) {
-    &:nth-child(1) {
-      grid-column: span 3;
-      aspect-ratio: 16 / 10;
-    }
-
-    &:nth-child(2) {
-      grid-column: span 3;
-      aspect-ratio: 16 / 10;
-    }
-
-    &:nth-child(n + 3) {
-      grid-column: span 2;
-      aspect-ratio: 4 / 5;
-    }
+  @include respond(md) {
+    flex-basis: min(24vw, 15rem);
   }
 }
 
@@ -65,15 +88,27 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--transition-slow);
 }
 
-.item:hover .image {
-  transform: scale(1.04);
+@keyframes galleryMarquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .item:hover .image {
-    transform: none;
+  .track {
+    animation: none;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .item {
+    flex-basis: min(72vw, 14rem);
   }
 }

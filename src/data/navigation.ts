@@ -6,7 +6,6 @@ export type NavItem = {
 const sections = [
   { label: 'О квесте', hash: 'about' },
   { label: 'Атмосфера', hash: 'atmosphere' },
-  { label: 'Детали', hash: 'details' },
   { label: 'Галерея', hash: 'gallery' },
   { label: 'Отзывы', hash: 'reviews' },
   { label: 'FAQ', hash: 'faq' },
