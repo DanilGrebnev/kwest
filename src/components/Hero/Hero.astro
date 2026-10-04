@@ -16,12 +16,20 @@ import styles from './Hero.module.scss';
         muted
         loop
         playsinline
-        preload="metadata"
-        poster={hero.posterSrc}
+        webkit-playsinline
+        x5-playsinline
+        preload="auto"
+        src={hero.videoSrc}
       >
-        <source src={hero.videoSrc} type="video/mp4" />
       </video>
-      <div class={styles.fallback} role="img" aria-label=""></div>
+      {/* Fallback: статичный poster вместо видео — раскомментировать блок ниже и стили .fallback в Hero.module.scss
+      <div
+        class={styles.fallback}
+        role="img"
+        aria-label=""
+        style={`background-image: url('${hero.posterSrc}')`}
+      ></div>
+      */}
     </div>
     <div class={styles.overlay}></div>
     <div class={styles.vignette}></div>
@@ -73,3 +81,7 @@ import styles from './Hero.module.scss';
     </Container>
   </div>
 </section>
+
+<script>
+  import './hero-video.client.ts';
+</script>
